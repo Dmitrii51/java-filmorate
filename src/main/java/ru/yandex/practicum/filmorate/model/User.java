@@ -7,12 +7,12 @@ import java.time.format.DateTimeFormatter;
 
 @Data
 public class User {
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private int id;
     private String email;
     private String login;
     private String name;
     private LocalDate birthday;
-    public final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public User(String email, String login, String name, String birthday) {
         this.email = email;

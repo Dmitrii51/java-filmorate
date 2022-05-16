@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.*;;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -11,12 +11,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
     private final HashMap<Integer, User> userList = new HashMap<>();
     private int uniqueId;
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     @GetMapping
     public List<User> getUserList() {
@@ -29,7 +30,7 @@ public class UserController {
             uniqueId += 1;
             newUser.setId(uniqueId);
             userList.put(uniqueId, newUser);
-            log.info("Добавление нового пользователя c id " + newUser.getId());
+            log.info("Добавление нового пользователя c id {}", newUser.getId());
         }
         return newUser;
     }
@@ -39,8 +40,9 @@ public class UserController {
         int userId = user.getId();
         if (userList.containsKey(userId) && validateUser(user)) {
             userList.put(userId, user);
-            log.info("Изменение информации о пользователе с id " + user.getId());
+            log.info("Изменение информации о пользователе с id {}", user.getId());
         } else {
+            log.warn("Ошибка валидации пользователя {} при попытке обновления", user);
             throw new ValidationException("Указанного пользователя не существует");
         }
         return user;
@@ -48,13 +50,13 @@ public class UserController {
 
     private boolean validateUser(User user) {
         if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.info("Ошибка валидации email пользователя - " + user.getEmail());
+            log.warn("Ошибка валидации email пользователя - {}", user.getEmail());
             throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
         } else if (user.getLogin().isEmpty() || user.getLogin().isBlank()) {
-            log.info("Ошибка валидации логина пользователя - " + user.getLogin());
+            log.warn("Ошибка валидации логина пользователя - {}", user.getLogin());
             throw new ValidationException("Логин не может быть пустым и содержать пробелы");
         } else if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.info("Ошибка валидации даты рождения пользователя - " + user.getBirthday().format(User.FORMATTER));
+            log.warn("Ошибка валидации даты рождения пользователя - {}", user.getBirthday());
             throw new ValidationException("Дата рождения не может быть в будущем");
         } else {
             return true;

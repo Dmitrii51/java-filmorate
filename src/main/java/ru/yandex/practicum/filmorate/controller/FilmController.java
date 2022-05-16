@@ -14,11 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final HashMap<Integer, Film> filmList = new HashMap<>();
-    private int uniqueId;
     private static final LocalDate CINEMA_DAY = LocalDate.of(1895, 12, 28);
     private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
+    private final HashMap<Integer, Film> filmList = new HashMap<>();
+    private int uniqueId;
 
     @GetMapping
     public List<Film> getFilmList() {
@@ -31,7 +31,7 @@ public class FilmController {
             uniqueId += 1;
             newFilm.setId(uniqueId);
             filmList.put(uniqueId, newFilm);
-            log.info("Добавление нового фильма c id " + newFilm.getId());
+            log.info("Добавление нового фильма c id {}", newFilm.getId());
         }
         return newFilm;
     }
@@ -41,8 +41,9 @@ public class FilmController {
         int filmId = film.getId();
         if (filmList.containsKey(filmId) && validateFilm(film)) {
             filmList.put(filmId, film);
-            log.info("Изменение информации о фильме с id " + film.getId());
+            log.info("Изменение информации о фильме с id {}", film.getId());
         } else {
+            log.warn("Ошибка валидации фильма {} при попытке обновления", film);
             throw new ValidationException("Указанного фильма не существует");
         }
         return film;
@@ -50,16 +51,16 @@ public class FilmController {
 
     private boolean validateFilm(Film film) {
         if (film.getName().isEmpty() || film.getName().isBlank()) {
-            log.info("Ошибка валидации названия фильма - " + film.getName());
+            log.warn("Ошибка валидации названия фильма - {}", film.getName());
             throw new ValidationException("Название фильма не может быть пустым");
         } else if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH || film.getDescription().isEmpty()) {
-            log.info("Ошибка валидации описания фильма - " + film.getDescription());
+            log.warn("Ошибка валидации описания фильма - {}", film.getDescription());
             throw new ValidationException("Описание фильма не может быть пустым и не должно быть больше 200 символов");
         } else if (film.getReleaseDate().isBefore(CINEMA_DAY)) {
-            log.info("Ошибка валидации даты релиза фильма - " + film.getReleaseDate().format(Film.FORMATTER));
+            log.warn("Ошибка валидации даты релиза фильма - {}", film.getReleaseDate());
             throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
         } else if (film.getDuration() <= 0) {
-            log.info("Ошибка валидации длительности фильма - " + film.getDuration());
+            log.warn("Ошибка валидации длительности фильма - {}", film.getDuration());
             throw new ValidationException("Длительность фильма не может быть отрицательной");
         } else {
             return true;
