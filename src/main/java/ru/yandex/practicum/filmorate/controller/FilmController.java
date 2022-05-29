@@ -2,68 +2,61 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private static final LocalDate CINEMA_DAY = LocalDate.of(1895, 12, 28);
-    private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private final HashMap<Integer, Film> filmList = new HashMap<>();
-    private int uniqueId;
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmStorage filmStorage, FilmService filmService) {
+        this.filmStorage = filmStorage;
+        this.filmService = filmService;
+    }
+
+    @GetMapping("/{filmId}")
+    public Film getFilm(@PathVariable int filmId) {
+        return filmStorage.getFilm(filmId);
+    }
 
     @GetMapping
     public List<Film> getFilmList() {
-        return new ArrayList<>(filmList.values());
+        return filmStorage.getFilmList();
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") String count) {
+        int countToInt = Integer.parseInt(count);
+        return filmService.getPopularFilms(countToInt);
     }
 
     @PostMapping
-    public Film createFilm(@RequestBody Film newFilm) {
-        if (newFilm.getId() == 0 && validateFilm(newFilm)) {
-            uniqueId += 1;
-            newFilm.setId(uniqueId);
-            filmList.put(uniqueId, newFilm);
-            log.info("Добавление нового фильма c id {}", newFilm.getId());
-        }
-        return newFilm;
+    public Film createFilm(@Valid @RequestBody Film newFilm) {
+        return filmStorage.addFilm(newFilm);
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
-        int filmId = film.getId();
-        if (filmList.containsKey(filmId) && validateFilm(film)) {
-            filmList.put(filmId, film);
-            log.info("Изменение информации о фильме с id {}", film.getId());
-        } else {
-            log.warn("Ошибка валидации фильма {} при попытке обновления", film);
-            throw new ValidationException("Указанного фильма не существует");
-        }
-        return film;
+    public Film updateFilm(@Valid @RequestBody Film film) {
+        return filmStorage.updateFilm(film);
     }
 
-    private boolean validateFilm(Film film) {
-        if (film.getName().isEmpty() || film.getName().isBlank()) {
-            log.warn("Ошибка валидации названия фильма - {}", film.getName());
-            throw new ValidationException("Название фильма не может быть пустым");
-        } else if (film.getDescription().length() > MAX_DESCRIPTION_LENGTH || film.getDescription().isEmpty()) {
-            log.warn("Ошибка валидации описания фильма - {}", film.getDescription());
-            throw new ValidationException("Описание фильма не может быть пустым и не должно быть больше 200 символов");
-        } else if (film.getReleaseDate().isBefore(CINEMA_DAY)) {
-            log.warn("Ошибка валидации даты релиза фильма - {}", film.getReleaseDate());
-            throw new ValidationException("Дата релиза фильма не может быть раньше 28 декабря 1895 года");
-        } else if (film.getDuration() <= 0) {
-            log.warn("Ошибка валидации длительности фильма - {}", film.getDuration());
-            throw new ValidationException("Длительность фильма не может быть отрицательной");
-        } else {
-            return true;
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public void likeFilm(@PathVariable int id, @PathVariable int userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public void dislikeFilm(@PathVariable int id, @PathVariable int userId) {
+        filmService.removeLike(id, userId);
     }
 }
