@@ -26,7 +26,7 @@ public class Film implements Comparable<Film> {
     private int duration;
 
     @NotBlank(message = "Название фильма не может состоять только из пробелов")
-    @NotEmpty(message = "Назавание фильма не может быть пустым")
+    @NotEmpty(message = "Название фильма не может быть пустым")
     private String name;
 
     @NotBlank(message = "Описание фильма не может состоять только из пробелов")
