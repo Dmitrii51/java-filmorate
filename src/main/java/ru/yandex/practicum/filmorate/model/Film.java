@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.yandex.practicum.filmorate.model.util.validator.After;
@@ -20,7 +21,8 @@ public class Film implements Comparable<Film> {
     private final static String CINEMA_DAY = "1895-12-28";
     private final static int MIN_DESCRIPTION_LENGTH = 1;
     private final static int MAX_DESCRIPTION_LENGTH = 200;
-    private final Set<Integer> likes;
+    private Set<Integer> likes;
+    private Set<Genre> genres;
     private int id;
     @Positive
     private int duration;
@@ -38,12 +40,44 @@ public class Film implements Comparable<Film> {
     @After(value = CINEMA_DAY, message = "Дата релиза фильма не может быть раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
 
-    public Film(String name, String description, String releaseDate, int duration) {
+    private Mpa mpa;
+
+    private int rate;
+
+    @JsonCreator
+    public Film(String name, String description, String releaseDate, int duration, int rate, Mpa mpaRating) {
         this.name = name;
         this.description = description;
         this.releaseDate = LocalDate.parse(releaseDate, FORMATTER);
         this.duration = duration;
         this.likes = new HashSet<>();
+        this.mpa = mpaRating;
+        this.rate = rate;
+    }
+
+    public Film(int id, String name, String description, int duration, int rate,
+                LocalDate releaseDate, Mpa mpaRating, HashSet<Integer> likes, HashSet<Genre> genres) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.mpa = mpaRating;
+        this.likes = likes;
+        this.genres = genres;
+        this.rate = rate;
+    }
+
+    public Film(int id, String name, String description, int duration, int rate,
+                LocalDate releaseDate, Mpa mpaRating, HashSet<Integer> likes) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.duration = duration;
+        this.releaseDate = releaseDate;
+        this.mpa = mpaRating;
+        this.likes = likes;
+        this.rate = rate;
     }
 
     public void addLike(int userId) {

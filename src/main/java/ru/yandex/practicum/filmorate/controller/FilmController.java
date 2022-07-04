@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -51,12 +51,12 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public void likeFilm(@PathVariable int id, @PathVariable int userId) {
-        filmService.addLike(id, userId);
+    public Film likeFilm(@PathVariable int id, @PathVariable int userId) {
+        return filmService.addLike(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public void dislikeFilm(@PathVariable int id, @PathVariable int userId) {
-        filmService.removeLike(id, userId);
+    public Film dislikeFilm(@PathVariable int id, @PathVariable int userId) {
+        return filmService.removeLike(id, userId);
     }
 }

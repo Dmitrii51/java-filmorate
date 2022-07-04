@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,16 +20,18 @@ public class FilmService {
         this.filmStorage = filmStorage;
     }
 
-    public void addLike(int filmId, int userId) {
+    public Film addLike(int filmId, int userId) {
         Film film = filmStorage.getFilm(filmId);
         userStorage.getUser(userId);
-        film.addLike(userId);
+        filmStorage.updateFilm(film);
+        return film;
     }
 
-    public void removeLike(int filmId, int userId) {
+    public Film removeLike(int filmId, int userId) {
         Film film = filmStorage.getFilm(filmId);
         userStorage.getUser(userId);
-        film.removeLike(userId);
+        filmStorage.updateFilm(film);
+        return film;
     }
 
     public List<Film> getPopularFilms(int count) {

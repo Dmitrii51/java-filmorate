@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -32,6 +33,7 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     private LocalDate birthday;
 
+    @JsonCreator
     public User(String email, String login, String name, String birthday) {
         this.email = email;
         this.login = login;
@@ -42,6 +44,15 @@ public class User {
         }
         this.birthday = LocalDate.parse(birthday, FORMATTER);
         this.friends = new HashSet<>();
+    }
+
+    public User(int id, String email, String login, String name, LocalDate birthday, HashSet<Integer> friends) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+        this.friends = friends;
     }
 
     public void addFriend(int friendId) {

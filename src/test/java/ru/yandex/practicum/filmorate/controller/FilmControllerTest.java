@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.Objects;
 
@@ -17,6 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmControllerTest {
     @Autowired
     private ObjectMapper mapper;
@@ -30,11 +35,12 @@ class FilmControllerTest {
                 "Two astronomers go on a media tour to warn humankind of a planet-killing comet hurtling " +
                         "toward Earth. The response from a distracted world: " + "Mehhhhhhhhhhhhhhhhhhhhhhhhhhh" +
                         "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.",
-                "2021-12-05", 120);
+                "2021-12-05", 120, 5, new Mpa(2, "PG"));
         String body = mapper.writeValueAsString(newFilm);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
 
     @Test
     public void updateFilm() throws Exception {
@@ -42,7 +48,7 @@ class FilmControllerTest {
                 "Two astronomers go on a media tour to warn humankind of a planet-killing comet hurtling " +
                         "toward Earth. The response from a distracted world: " + "Mehhhhhhhhhhhhhhhhhhhhhhhhhhh" +
                         "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.",
-                "2021-12-05", 120);
+                "2021-12-05", 120, 5, new Mpa(2, "PG"));
         String body1 = mapper.writeValueAsString(newFilm);
         this.mockMvc.perform(post("/films").content(body1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -60,12 +66,12 @@ class FilmControllerTest {
                 .andExpect(status().isOk());
 
         Film newFilm1 = new Film("TestFilm1", "Just good film",
-                "2000-12-27", 120);
+                "2000-12-27", 120, 5, new Mpa(2, "PG"));
         Film newFilm2 = new Film("TestFilm2",
                 "Two astronomers go on a media tour to warn humankind of a planet-killing comet hurtling " +
                         "toward Earth. The response from a distracted world: " + "Mehhhhhhhhhhhhhhhhhhhhhhhhhhh" +
                         "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.",
-                "2021-12-05", 50);
+                "2021-12-05", 50, 5, new Mpa(2, "PG"));
         String body1 = mapper.writeValueAsString(newFilm1);
         String body2 = mapper.writeValueAsString(newFilm2);
         this.mockMvc.perform(post("/films").content(body1).contentType(MediaType.APPLICATION_JSON));
@@ -77,7 +83,7 @@ class FilmControllerTest {
     @Test
     public void updateNonexistentFilm() throws Exception {
         Film film = new Film("Test Film", "Good film",
-                "2005-12-27", 120);
+                "2005-12-27", 120, 5, new Mpa(2, "PG"));
         String body = mapper.writeValueAsString(film);
         this.mockMvc.perform(put("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -88,7 +94,7 @@ class FilmControllerTest {
     @Test
     public void createFilmWithoutName() throws Exception {
         Film filmWithoutName = new Film("", "Good film",
-                "2005-12-27", 120);
+                "2005-12-27", 120, 5, new Mpa(2, "PG"));
         String body = mapper.writeValueAsString(filmWithoutName);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -100,7 +106,7 @@ class FilmControllerTest {
     @Test
     public void createFilmWithNegativeDuration() throws Exception {
         Film filmWithNegativeDuration = new Film("TestFilm", "Good film",
-                "2005-12-27", -120);
+                "2005-12-27", -120, 5, new Mpa(2, "PG"));
         String body = mapper.writeValueAsString(filmWithNegativeDuration);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -112,7 +118,7 @@ class FilmControllerTest {
     @Test
     public void createFilmWithWrongSizeDescription() throws Exception {
         Film filmWithWrongSizeDescription1 = new Film("TestFilm", "",
-                "2005-12-27", 120);
+                "2005-12-27", 120, 5, new Mpa(2, "PG"));
         String body1 = mapper.writeValueAsString(filmWithWrongSizeDescription1);
         this.mockMvc.perform(post("/films").content(body1).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -124,7 +130,7 @@ class FilmControllerTest {
                 "Two astronomers go on a media tour to warn humankind of a planet-killing comet hurtling " +
                         "toward Earth. The response from a distracted world: " + "Mehhhhhhhhhhhhhhhhhhhhhhhhhhh" +
                         "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh.",
-                "2021-12-05", 120);
+                "2021-12-05", 120, 5, new Mpa(2, "PG"));
         String body2 = mapper.writeValueAsString(filmWithWrongSizeDescription2);
         this.mockMvc.perform(post("/films").content(body2).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
@@ -136,7 +142,7 @@ class FilmControllerTest {
     @Test
     public void createFilmWithWrongReleaseDate() throws Exception {
         Film filmWithWrongReleaseDate = new Film("TestFilm", "Just good film",
-                "1895-12-27", 120);
+                "1895-12-27", 120, 5, new Mpa(2, "PG"));
         String body = mapper.writeValueAsString(filmWithWrongReleaseDate);
         this.mockMvc.perform(post("/films").content(body).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
