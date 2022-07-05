@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -51,6 +50,9 @@ public class FilmDbStorage implements FilmStorage {
     private final String SQL_INSERT_FILM_LIKES = "INSERT INTO likes (film_id, user_id) VALUES(?, ?)";
     private final String SQL_DELETE_LIKES = "DELETE FROM likes " +
             "WHERE film_id = ?";
+    private final String SQL_DELETE_FILM_BY_ID = "DELETE FROM films " +
+            "WHERE film_id = ?";
+    private final String SQL_DELETE_FILM_LIST = "DELETE FROM films";
 
 
     @Autowired
@@ -125,6 +127,23 @@ public class FilmDbStorage implements FilmStorage {
             film1.setGenres(null);
         }
         return film1;
+    }
+
+    @Override
+    public void deleteFilm(int id) {
+        int result = jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, id);
+        if (result == 1) {
+            log.info("Удаление фильма с id {}", id);
+        } else {
+            log.warn("Попытка удаления несуществующего фильма с id - {}", id);
+            throw new ResourceNotFoundException(getMessageForFilmNotFoundException(id));
+        }
+    }
+
+    @Override
+    public void deleteFilmList() {
+        jdbcTemplate.update(SQL_DELETE_FILM_LIST);
+        log.info("Удаление списка пользователей");
     }
 
     private Film makeFilm(ResultSet rs) throws SQLException {
